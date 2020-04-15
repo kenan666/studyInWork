@@ -1,0 +1,345 @@
+1、创建空目录
+mkdir folder
+cd folder 
+pwd
+
+2、初始化
+打开 bash cmd  -->鼠标右键 git bash here
+git init -->显示结果  Initialized empty Git repository in /Users/michael/learngit/.git/
+
+3、测试
+比如
+新建文件 readme.txt
+Git is a version control system.
+Git is free software.
+----------
+执行命令
+git add readme.txt   # 添加文件  git add
+
+git commit -m "wrote a readme file"  # 提交文件 git commit  -m后面表示本次文件提交说明“” 
+
+tips： 文件可以多次添加（add），但是提交（commit）只需要一次提交，也可以添加（add）一次，提交（commit）一次
+比如：
+git add file1
+git add file2 file3
+git commit -m "3 files added"
+
+-------------------------------------------------------------
+conclusion:
+1)初始化Git仓库  git init
+2)使用命令git add <file>，注意，可反复多次使用，添加多个文件
+3)使用命令git commit -m <message>，完成
+-------------------------------------------------------------
+
+4、多次版本提交之后，但是现在想回到之前的版本
+1)可以查看下每次提交的历史记录
+git log  -->输出详细信息  / git log --pretty=oneline  -->简要信息
+tips：类似看见一长串字符，--> 那是commit ID -- 后面可以用到
+
+2)如果发现当前版本不是需要的版本，可以退回去上一个迭代版本
+git reset --hard HEAD^   # ^ 符号表示上一个版本  ^^表示上上个版本，以此类推，当出现很多个的时候，可以用~代替比如HEAD~100
+
+cat readme.txt  # 查看当前file
+
+git log  #可以再次查看版本迭代状态 
+
+-------------------------------------------------------------
+如果需要一次性直接恢复到某个状态，此时可以利用 commit ID ，但是无需全部复制，只需要复制一段即可，例如：
+commit 217ef04716425fcda263869e88a9b89b27b55b7d   # 完整 commit ID  ，第一次提交
+commit b3c1258ac9fba4cb5fb160662c31734fde74236b   # 第二次迭代 commit ID 
+
+比如：退回第一次迭代版本  
+git reset --hard 217ef04 # copy一段即可
+
+cat readme.txt  #查看退回之后的版本是否正确
+
+3)如果想再次回到最新迭代的版本，此时必须要找到最新一次版本的commit ID，git中提供了 git reflog 记录了每一次的命令
+git reflog  # 输出结果包含 cmooit ID ，所以就可以随意的进行操作。
+
+-------------------------------------------------------------
+conclusion
+1、HEAD指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard commit_id
+2、穿梭前，用git log可以查看提交历史，以便确定要回退到哪个版本
+3、要重返未来，用git reflog查看命令历史，以便确定要回到未来的哪个版本
+-------------------------------------------------------------
+
+5、工作区间、暂存区间
+
+工作区间---就是你在电脑里能看到的目录，比如我的studyInWork文件夹就是一个工作区
+版本库---工作区间有一个隐藏文件夹 .git ,这是版本出，不是工作区间
+
+我们把文件往 Git 版本库里添加的时候，是分两步执行的：
+第一步是用git add把文件添加进去，实际上就是把文件修改添加到暂存区
+第二步是用git commit提交更改，实际上就是把暂存区的所有内容提交到当前分支
+
+1)测试
+比如：
+
+将readme.txt文件修改为
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+
+新建文件  LICENSE  #内容随意
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+
+2)查看状态
+git status
+输出：readme.txt被修改了，而LICENSE还从来没有被添加过，所以它的状态是Untracked。
+
+此时：
+git add readme.txt
+git add LICENSE
+
+git status
+输出：添加了两个文件
+
+git commit -m "understand how stage works" #提交成功
+
+git status  # nothing to commit, working tree clean
+-------------------------------------------------------------
+conclusion
+工作区间就是文件提交前的位置，而后提交之后，会自动到.git库中
+比如：
+修改文件之后  git status  # 查看状态
+git add  # 添加到上传
+git commit  # 准备提交
+git status # 再次查看状态  nothing to commit, working tree clean
+
+6、管理修改
+不管做了什么的修改，都需要进行 git add，这样才能每次追踪到修改，反之亦然。但是，不需要每次都提交（commit）
+比如：
+第一次修改之后，git add ;
+第二次修改之后，没有git add;
+此时，git commit,
+git status  # 输出结果为第一次修改，并未显示第二次修改
+
+那么，此时，
+git add 第二次修改；
+git commit,
+git status # nothing to commit, working tree clean
+
+cat file  # 可以查看内容
+-------------------------------------------------------------
+conclusion
+git能追踪每次修改，但是必须 git add ，如果不用git add到暂存区，那就不会加入到commit中
+
+7、撤销修改
+如果出现问题，或者出现错误，可以及时的修正。比如：
+在readme.txt文件中多添加了一行 message，但是，是错误的，则：
+可以先查看下状态：
+git status
+然后 
+git checkout -- readme.txt (filename)  # 中间两道 -- 不可缺少。
+
+命令git checkout -- readme.txt意思就是，把readme.txt文件在工作区的修改全部撤销，这里有两种情况：
+	一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+	一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+总之，就是让这个文件回到最近一次git commit或git add时的状态。
+
+cat readme.txt  # 发现仍然是修改之前的message，文件复原
+-------------------------------------------------------------
+以上是没有上传(not add)的文件，如果是上传了，比如：
+在readme.txt中添加了一些message，而且：git add readme.txt
+git status # 查看下状态  输出 change to be committed
+此时：
+git reset HEAD readme.txt  # 利用git reset HEAD file 将暂存区的修改撤掉，重回工作区
+git status  # 输出 changes not staged for commit 
+git checkout -- filename  # 丢弃工作区的修改
+git status # 输出 nothing to commit ,working tree cleaning 
+-------------------------------------------------------------
+conclusion
+场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
+
+场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令git reset HEAD <file>，就回到了场景1，第二步按场景1操作。
+
+场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+-------------------------------------------------------------
+
+8、文件删除
+1)如果提交了错误文件，比如：
+git add filename
+git commit -m "message"
+2)一般情况先的删除，rm 命令
+rm filename  # 移除没有用的 
+git status # 输出 deleted filename  tips：此时只是告诉git需要删除的文件，其实还没有真正的删除
+3)现在有两种删除选项
+	1、一是确实要从版本库中删除该文件，那就用命令git rm删掉，并且git commit
+	git rm filename  # message: rm filename 
+	git commit -m "message "
+	文件从版本库中删除
+	2、另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：
+	git checkout -- filename 
+-------------------------------------------------------------
+conclusion
+命令git rm用于删除一个文件。如果一个文件已经被提交到版本库，那么你永远不用担心误删，但是要小心，你只能恢复文件到最新版本，你会丢失最近一次提交后你修改的内容
+-------------------------------------------------------------
+
+9、建立远程库   github  ***
+1)首先登陆GitHub建立远程库
+	1、在右上角找到 new repository
+	2、在Repository name填入库名（example：learngit），其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
+2)关联本地库，也就是执行文件夹与库进行关联
+cmd 命令行中执行
+git remote add kenan666 1746740633@qq.com:kenan666/learngit.git # add 后面是个人的github账户名  后面邮箱是个人邮箱  再后面是也是个人GitHub账户名
+然后，
+git push -u kenan666 master  #  -u 后面是个人的github账户名
+#tips：
+把本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程。
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+
+以后的推送利用命令：
+git push kenan666 master # 推送完成
+
+#########################
+当你第一次使用Git的clone或者push命令连接GitHub时，会得到一个警告：
+	The authenticity of host 'github.com (xx.xx.xx.xx)' can't be established.
+	RSA key fingerprint is xx.xx.xx.xx.xx.
+	Are you sure you want to continue connecting (yes/no)?  --> yes
+这是因为Git使用SSH连接，而SSH连接在第一次验证GitHub服务器的Key时，需要你确认GitHub的Key的指纹信息是否真的来自GitHub的服务器，输入yes回车即可。
+
+Git会输出一个警告，告诉你已经把GitHub的Key添加到本机的一个信任列表里了：	
+这个警告只会出现一次，后面的操作就不会有任何警告了。
+如果你实在担心有人冒充GitHub服务器，输入yes前可以对照GitHub的RSA Key的指纹信息是否与SSH连接给出的一致。
+-------------------------------------------------------------
+conclusion
+先建立远程库，然后利用git remote add origin git@server-name:path/repo-name.git进行远程库关联；
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+-------------------------------------------------------------
+####################################################
+special TIPS：
+$ git push -u origin master
+Warning: Permanently added the RSA host key for IP address '13.229.188.59' to the list of known hosts.
+git@github.com: Permission denied (publickey).
+fatal: Could not read from remote repository.
+Please make sure you have the correct access rights
+and the repository exists.
+
+解决办法：
+1)
+C:\Windows\System32\drivers\etc\hosts
+添加一行：13.229.188.59 github.com   # 此处的IP地址，根据自己计算机生成的，在错误列表里会出现
+2)
+输入 ssh-keygen -t rsa 
+再按三次回车，就生成了本地电脑公匙（再回车一下才会生成）
+3)
+在自己的github账号Settings/SSH and GPG keys，创建新SSH keys,将C:/Users/32332/.ssh/id_rsa.pub中的内容粘贴到其中，ok   # 此文件为隐藏文件，可以展开隐藏，然后直接搜索即可
+####################################################
+-------------------------------------------------------------
+
+10、分支上传，更加安全
+1)首先，我们创建dev分支，然后切换到dev分支
+git checkout -b dev  
+####
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令
+git branch dev
+git checkout dev
+
+2)查看分支
+git branch  #  当前所在分支会多出一个 * 
+
+3)测试，例如：
+在readme.txt文件中进行修改： Creating a new branch is quick.
+然后提交
+git add readme.txt
+git commit -m "branch test"
+
+此时branch dev 工作结束，切回master
+git checkout master  #  切回master分支后查看readme.txt文件时，添加内容不见了！只是在dev分支上进行了提交，并未发生在master中，所以进行接下来工作 merge
+git merge dev  # 合并后可以发现readme.txt内容便是我们需要的内容
+
+tips：这种方式是一种 fast-forward方式，并不是所有的合并都是通过这种模式
+4)合并完成后
+git branch -d dev  # delete branch dev
+git branch  # 输出 *master
+
+------------------------
+switch
+我们注意到切换分支使用git checkout <branch>，而前面讲过的撤销修改则是git checkout -- <file>，同一个命令，有两种作用，确实有点令人迷惑。
+实际上，切换分支这个动作，用switch更科学。因此，最新版本的Git提供了新的git switch命令来切换分支：
+创建并切换到新的dev分支，可以使用：
+git switch -c dev
+直接切换到已有的master分支，可以使用：
+git switch master
+-------------------------------------------------------------
+conclusion
+
+查看分支：git branch
+创建分支：git branch <name>
+切换分支：git checkout <name>或者git switch <name>
+创建+切换分支：git checkout -b <name>或者git switch -c <name>
+合并某分支到当前分支：git merge <name>
+删除分支：git branch -d <name>
+删除远程库中的分支：git push origin --delete <BranchName>
+-------------------------------------------------------------
+
+11、解决冲突
+解决分支中存在的问题，例如：
+1)建立新的分支
+git switch -c feature1
+
+2)修改readme.txt，并提交  Creating a new branch is quick AND simple.
+git add readme.txt
+git commit -m "AND simple"
+
+3)切换分支 master
+git switch master # tips Git还会自动提示我们当前master分支比远程的master分支要超前1个提交。
+并修改master分支上的readme.txt  Creating a new branch is quick & simple.
+再次提交
+git add readme.txt
+git commit -m "& simple"
+
+4)合并
+git merge feature1 # tips : CONFLICT
+
+修改readme.txt  Creating a new branch is quick and simple.
+
+5)再次提交
+git add readme.txt
+git commit -m "conflict fixed"
+
+# 此时可以查看分支合并情况
+git log --graph --pretty=oneline --abbrev-commit
+
+6)delete branch 
+git branch -d feature1
+-------------------------------------------------------------
+conclusion
+当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。
+用git log --graph命令可以看到分支合并图。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
